@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>
+    look alike domain management
+  </title>
+  <!-- <script type="text/javascript" src="http://localhost:8887/look_a_like.js"></script> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="container" >
+    <div class="row" id="page_header">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="row" style="margin-top: 10%">
+          <h1>Look alike domains review</h1>
+        </div>
+        <div class="row" style="margin-top: 2%">
+          <label>Select a domains list file :</label>
+        </div>
+        <div class="row" style="margin-top: 1%">
+          <input type="file" id="files" name="files[]" multiple />
+        </div>
+        <div class="row" >
+          <div class="mx-auto" id="page_body" style="padding: 10px;">
+          </div>
+        </div>
+        <div class="row">
+          <div class="mx-auto" style="padding: 10px; width: 1000px;">
+            <div class="row">
+              <button type="button" id="load_next_10_domains" class="btn btn-primary btn-lg" style="margin: 2.5%; width: 45%;">Load Next 10</button>
+              <button type="button" id="export_selected_domains" class="btn btn-info btn-lg"style="margin: 2.5%; width: 45%;">Export Selected Domains</button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var last_shown_domain_index = 0;
+      var domain_lines ;
+      var populate_frames =  function(res, start, end){
+        console.log(start+end);
+        for (var domain = start ; domain < end ; domain++){
+          console.log(start + domain);
+          console.log( res[domain]);
+          var frame_div = '<div id="frame_div_'+ domain +'" style=" center center no-repeat; float:left;  width:33%;  padding:5px;" ></div>';
+          var checkbox ='<div><input id = "'+res[domain] +'" type="checkbox" name="'+res[domain] +'" value="'+res[domain] +'" > '+res[domain]+' </input><a href="//'+res[domain]+'" target="_blank">view</a></div>';
+          $("#page_body").append(frame_div);
+          $("#frame_div_"+ domain ).append(checkbox);
+          $("#frame_div_"+ domain ).append('<iframe sandbox style="width:100%;" name="'+ res[domain] +'"  src="//'+ res[domain] +'" ></iframe>');
+        }
+        last_shown_domain_index = end;
+      };
+      $("iframe").on('load',function(e){
+        console.log(e);
+        $(this).css('background-image', 'none');
+      });
+      $("iframe").on('error',function(e){
+        $(this).append('Could not load');
+      });
+
+      $("#export_selected_domains").on('click', function(e){
+        console.log($("[type='checkbox']:checked").get());
+        var selected_domains = $("[type='checkbox']:checked").get();
+        if(selected_domains.length > 0){
+          for (var temp_domain in selected_domains){
+            selected_domains[temp_domain] = selected_domains[temp_domain].defaultValue;
+          }
+          alert(selected_domains);
+        }else{
+          alert( "No domains selected");
+
+        }
+      });
+
+      $("#load_next_10_domains").on('click', function(e){
+        populate_frames(domain_lines, last_shown_domain_index, last_shown_domain_index+10);
+
+      });
+
+ $('#files').on('change', function () {
+  var fileReader = new FileReader();
+  fileReader.onload = function () {
+      var data = fileReader.result;
+      domain_lines = $.each( arr = fileReader.result.split(/[\r\n]+/g), function(index, val) {
+        arr[index] = arr[index].split(' ')[0];
+      });
+      populate_frames(domain_lines, 0, 10);
+
+    };
+    fileReader.readAsText($('#files').prop('files')[0]);
+  });
+</script>
+
+</body>
+</html>
